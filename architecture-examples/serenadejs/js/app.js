@@ -1,5 +1,5 @@
 (function() {
-  var App, Controller, Todo, element,
+  var App, Controller, Todo, element, template,
     __hasProp = Object.prototype.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -151,17 +151,20 @@
 
     Controller.prototype.edited = function(todo) {
       if (todo.title.trim()) {
-        if (todo.edit) return todo.set("edit", false);
+        if (todo.edit) todo.set("edit", false);
       } else {
-        return this.removeTodo(todo);
+        this.removeTodo(todo);
       }
+      return this.app.save();
     };
 
     return Controller;
 
   })();
 
-  element = Serenade.view(document.getElementById("app").innerHTML).render(App.find(1), Controller);
+  template = document.getElementById("app").innerHTML;
+
+  element = Serenade.view(template).render(App.find(1), Controller);
 
   document.body.insertBefore(element, document.body.children[0]);
 

@@ -39,6 +39,9 @@ class Controller
       todo.set("edit", false) if todo.edit
     else
       @removeTodo(todo)
+    @app.save()
 
-element = Serenade.view(document.getElementById("app").innerHTML).render(App.find(1), Controller)
+template = document.getElementById("app").innerHTML
+element = Serenade.view(template).render(App.find(1), Controller)
+
 document.body.insertBefore(element, document.body.children[0])
