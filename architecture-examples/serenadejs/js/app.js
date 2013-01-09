@@ -187,27 +187,27 @@
 
   router = Router({
     '/': function() {
-      return App.find(1).page = "all";
+      return App.find(1).page = 'all';
     },
     '/active': function() {
-      return App.find(1).page = "active";
+      return App.find(1).page = 'active';
     },
     '/completed': function() {
-      return App.find(1).page = "completed";
+      return App.find(1).page = 'completed';
     }
   });
 
   router.init();
 
-  Serenade.view("app", document.getElementById('app').innerHTML);
+  Serenade.view('app', document.getElementById('app').innerHTML);
 
-  Serenade.view("todo", document.getElementById('todo').innerHTML);
+  Serenade.view('todo', document.getElementById('todo').innerHTML);
 
-  Serenade.controller("app", AppController);
+  Serenade.controller('app', AppController);
 
-  Serenade.controller("todo", TodoController);
+  Serenade.controller('todo', TodoController);
 
-  element = Serenade.render("app", App.find(1));
+  element = Serenade.render('app', App.find(1));
 
   document.body.insertBefore(element, document.body.children[0]);
 
