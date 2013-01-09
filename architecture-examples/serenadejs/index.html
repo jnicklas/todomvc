@@ -24,14 +24,7 @@
 
           ul#todo-list
             - collection @todos
-              li[class=@classes]
-                form[event:submit=edited!]
-                  input.edit[on:load=loadField event:blur=edited! binding:change=@title]
-
-                - unless @edit
-                  input.toggle[type="checkbox" binding:change=@completed]
-                  label[event:dblclick=edit] @title
-                  button.destroy[event:click=removeTodo]
+              - view "todo"
 
         footer#footer
           span#todo-count
@@ -49,6 +42,17 @@
           - if @completedTodosCount
             button#clear-completed[event:click=clearCompleted]
               "Clear completed (" @completedTodosCount ")"
+  </script>
+
+  <script id="todo" type="text/serenade">
+    li[class=@classes]
+      form[event:submit=edited!]
+        input.edit[on:load=loadField event:blur=edited! binding:change=@title]
+
+      - unless @edit
+        input.toggle[type="checkbox" binding:change=@completed]
+        label[event:dblclick=edit] @title
+        button.destroy[event:click=removeTodo]
   </script>
 
 </head>

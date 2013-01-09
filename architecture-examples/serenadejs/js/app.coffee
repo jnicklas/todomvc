@@ -1,4 +1,5 @@
 class Todo extends Serenade.Model
+  @belongsTo 'app', inverseOf: 'todos', as: -> App
   @property 'completed', serialize: true
   @property 'title', serialize: true
   @property 'incomplete', dependsOn: 'completed', get: -> not @completed
@@ -8,10 +9,13 @@ class Todo extends Serenade.Model
     dependsOn: ['completed', 'edit'],
     get: -> ['editing' if @edit, 'completed' if @completed]
 
+  remove: ->
+    @app.todos.delete(this)
+
 class App extends Serenade.Model
   @localStorage = true
 
-  @hasMany 'todos', serialize: true, as: -> Todo
+  @hasMany 'todos', inverseOf: 'app', serialize: true, as: -> Todo
 
   @selection 'incompleteTodos', from: 'todos', filter: 'incomplete'
   @selection 'completedTodos', from: 'todos', filter: 'completed'
@@ -25,7 +29,7 @@ class App extends Serenade.Model
 
   @property 'newTitle'
 
-class Controller
+class AppController
   constructor: (@app) ->
 
   newTodo: ->
@@ -36,25 +40,30 @@ class Controller
   clearCompleted: ->
     @app.todos = @app.incompleteTodos
 
-  removeTodo: (target, todo) ->
-    @app.todos.delete(todo)
+class TodoController
+  constructor: (@todo) ->
 
-  edit: (target, todo, event) ->
-    todo.edit = true
+  removeTodo: ->
+    @todo.remove()
 
-    @field.focus()
+  edit: ->
+    @todo.edit = true
     @field.select()
 
-  edited: (target, todo) ->
-    if todo.title.trim()
-      todo.edit = false if todo.edit
+  edited: ->
+    if @todo.title.trim()
+      @todo.edit = false if @todo.edit
     else
-      @removeTodo(target, todo)
-    @app.save()
+      @todo.remove()
+    @todo.app.save()
 
   loadField: (@field) ->
 
-template = document.getElementById('app').innerHTML
-element = Serenade.view(template).render(App.find(1), Controller)
+# boring setup
+Serenade.view("app", document.getElementById('app').innerHTML)
+Serenade.view("todo", document.getElementById('todo').innerHTML)
+Serenade.controller("app", AppController)
+Serenade.controller("todo", TodoController)
 
+element = Serenade.render("app", App.find(1))
 document.body.insertBefore(element, document.body.children[0])
