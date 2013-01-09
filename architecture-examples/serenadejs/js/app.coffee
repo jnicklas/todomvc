@@ -1,10 +1,12 @@
 class Todo extends Serenade.Model
   @belongsTo 'app', inverseOf: 'todos', as: -> App
   @property 'title', serialize: true
-  @property 'completed', serialize: true
-  @property 'incomplete', dependsOn: 'completed', get: -> not @completed
-  @property 'edit'
 
+  @property 'completed', serialize: true
+  @property 'incomplete', dependsOn: 'completed',
+    get: -> not @completed
+
+  @property 'edit'
   @property 'classes',
     dependsOn: ['completed', 'edit'],
     get: -> ['editing' if @edit, 'completed' if @completed]
@@ -20,8 +22,8 @@ class App extends Serenade.Model
   @selection 'incompleteTodos', from: 'todos', filter: 'incomplete'
   @selection 'completedTodos', from: 'todos', filter: 'completed'
 
-  @property 'left', get: ->
-    if @incompleteTodosCount is 1 then 'item left' else 'items left'
+  @property 'left',
+    get: -> if @incompleteTodosCount is 1 then 'item left' else 'items left'
 
   @property 'allCompleted',
     get: -> @incompleteTodosCount is 0
@@ -30,11 +32,12 @@ class App extends Serenade.Model
   @property 'newTitle'
 
   @property 'page'
-  @property 'currentTodos', get: ->
-    switch @page
-      when 'all' then @todos
-      when 'active' then @incompleteTodos
-      when 'completed' then @completedTodos
+  @property 'currentTodos',
+    get: ->
+      switch @page
+        when 'all' then @todos
+        when 'active' then @incompleteTodos
+        when 'completed' then @completedTodos
 
 class AppController
   constructor: (@app) ->

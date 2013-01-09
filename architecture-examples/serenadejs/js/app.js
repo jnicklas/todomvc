@@ -28,7 +28,8 @@
     });
 
     Todo.property('incomplete', {
-      dependsOn: 'completed',
+      dependsOn: 'completed'
+    }, {
       get: function() {
         return !this.completed;
       }
