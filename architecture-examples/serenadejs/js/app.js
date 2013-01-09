@@ -19,11 +19,11 @@
       }
     });
 
-    Todo.property('completed', {
+    Todo.property('title', {
       serialize: true
     });
 
-    Todo.property('title', {
+    Todo.property('completed', {
       serialize: true
     });
 

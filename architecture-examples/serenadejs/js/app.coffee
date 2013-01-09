@@ -1,7 +1,7 @@
 class Todo extends Serenade.Model
   @belongsTo 'app', inverseOf: 'todos', as: -> App
-  @property 'completed', serialize: true
   @property 'title', serialize: true
+  @property 'completed', serialize: true
   @property 'incomplete', dependsOn: 'completed', get: -> not @completed
   @property 'edit'
 
