@@ -29,6 +29,13 @@ class App extends Serenade.Model
 
   @property 'newTitle'
 
+  @property 'page'
+  @property 'currentTodos', get: ->
+    switch @page
+      when 'all' then @todos
+      when 'active' then @incompleteTodos
+      when 'completed' then @completedTodos
+
 class AppController
   constructor: (@app) ->
 
@@ -58,6 +65,13 @@ class TodoController
     @todo.app.save()
 
   loadField: (@field) ->
+
+router = Router
+  '/': -> App.find(1).page = "all"
+  '/active': -> App.find(1).page = "active"
+  '/completed': -> App.find(1).page = "completed"
+
+router.init()
 
 # boring setup
 Serenade.view("app", document.getElementById('app').innerHTML)

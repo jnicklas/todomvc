@@ -23,7 +23,7 @@
           label[for="toggle-all"] "Mark all as complete"
 
           ul#todo-list
-            - collection @todos
+            - collection @currentTodos
               - view "todo"
 
         footer#footer
@@ -32,13 +32,13 @@
             " "
             @left
 
-          ul#filters
+          ul#filters[class=@page]
             li
-              a.selected[href="#/"] "All"
+              a.all[href="#/"] "All"
             li
-              a[href="#/active"] "Active"
+              a.active[href="#/active"] "Active"
             li
-              a[href="#/completed"] "Completed"
+              a.completed[href="#/completed"] "Completed"
           - if @completedTodosCount
             button#clear-completed[event:click=clearCompleted]
               "Clear completed (" @completedTodosCount ")"
@@ -55,6 +55,12 @@
         button.destroy[event:click=removeTodo]
   </script>
 
+  <style>
+    ul#filters.all .all, ul#filters.active .active, ul#filters.completed .completed {
+      font-weight: bold;
+    }
+  </style>
+
 </head>
 <body>
 	<footer id="info">
@@ -66,6 +72,7 @@
 	</footer>
 	<!-- Scripts here. Don't remove this ↓ -->
 	<script src="../../assets/base.js"></script>
+	<script src="../../assets/director.min.js"></script>
 	<script src="js/serenade.js"></script>
 	<script src="js/app.js"></script>
 </body>
