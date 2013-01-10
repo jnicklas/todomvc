@@ -70,10 +70,12 @@ class TodoController
 
   loadField: (@field) ->
 
+app = App.find(1)
+
 router = Router
-  '/': -> App.find(1).page = 'all'
-  '/active': -> App.find(1).page = 'active'
-  '/completed': -> App.find(1).page = 'completed'
+  '/': -> app.page = 'all'
+  '/active': -> app.page = 'active'
+  '/completed': -> app.page = 'completed'
 
 router.init()
 
@@ -83,5 +85,4 @@ Serenade.view('todo', document.getElementById('todo').innerHTML)
 Serenade.controller('app', AppController)
 Serenade.controller('todo', TodoController)
 
-element = Serenade.render('app', App.find(1))
-document.body.insertBefore(element, document.body.children[0])
+document.body.insertBefore(Serenade.render('app', app), document.body.children[0])
