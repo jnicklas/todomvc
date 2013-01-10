@@ -28,8 +28,7 @@
     });
 
     Todo.property('incomplete', {
-      dependsOn: 'completed'
-    }, {
+      dependsOn: 'completed',
       get: function() {
         return !this.completed;
       }
@@ -113,12 +112,12 @@
     App.property('currentTodos', {
       get: function() {
         switch (this.page) {
-          case 'all':
-            return this.todos;
           case 'active':
             return this.incompleteTodos;
           case 'completed':
             return this.completedTodos;
+          default:
+            return this.todos;
         }
       }
     });

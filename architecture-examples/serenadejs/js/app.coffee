@@ -3,7 +3,8 @@ class Todo extends Serenade.Model
   @property 'title', serialize: true
 
   @property 'completed', serialize: true
-  @property 'incomplete', dependsOn: 'completed',
+  @property 'incomplete',
+    dependsOn: 'completed',
     get: -> not @completed
 
   @property 'edit'
@@ -35,9 +36,9 @@ class App extends Serenade.Model
   @property 'currentTodos',
     get: ->
       switch @page
-        when 'all' then @todos
         when 'active' then @incompleteTodos
         when 'completed' then @completedTodos
+        else @todos
 
 class AppController
   constructor: (@app) ->
