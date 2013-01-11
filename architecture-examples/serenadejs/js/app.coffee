@@ -1,5 +1,5 @@
 class Todo extends Serenade.Model
-  @belongsTo 'app', inverseOf: 'todos', as: -> App
+  @belongsTo 'app', inverseOf: 'all', as: -> App
   @property 'title', serialize: true
 
   @property 'completed', serialize: true
@@ -8,48 +8,43 @@ class Todo extends Serenade.Model
     get: -> not @completed
 
   @property 'edit'
-  @property 'classes',
-    dependsOn: ['completed', 'edit'],
-    get: -> ['editing' if @edit, 'completed' if @completed]
 
   remove: ->
-    @app.todos.delete(this)
+    @app.all.delete(this)
 
 class App extends Serenade.Model
   @localStorage = true
 
-  @hasMany 'todos', inverseOf: 'app', serialize: true, as: -> Todo
+  @hasMany 'all', inverseOf: 'app', serialize: true, as: -> Todo
 
-  @selection 'incompleteTodos', from: 'todos', filter: 'incomplete'
-  @selection 'completedTodos', from: 'todos', filter: 'completed'
+  @selection 'active', from: 'all', filter: 'incomplete'
+  @selection 'completed', from: 'all', filter: 'completed'
 
-  @property 'left',
-    get: -> if @incompleteTodosCount is 1 then 'item left' else 'items left'
+  @property 'label',
+    get: -> if @activeCount is 1 then 'item left' else 'items left'
 
   @property 'allCompleted',
-    get: -> @incompleteTodosCount is 0
-    set: (value) -> todo.completed = value for todo in @todos
+    get: -> @activeCount is 0
+    set: (value) -> todo.completed = value for todo in @all
 
   @property 'newTitle'
 
-  @property 'page'
-  @property 'currentTodos',
-    get: ->
-      switch @page
-        when 'active' then @incompleteTodos
-        when 'completed' then @completedTodos
-        else @todos
+  @property 'filter', value: 'all'
+  @property 'filtered', get: -> @[@filter]
+  @property 'filterAll', get: -> @filter is 'all'
+  @property 'filterActive', get: -> @filter is 'active'
+  @property 'filterCompleted', get: -> @filter is 'completed'
 
 class AppController
   constructor: (@app) ->
 
   newTodo: ->
     title = @app.newTitle.trim()
-    @app.todos.push(title: title) if title
+    @app.all.push(title: title) if title
     @app.newTitle = ''
 
   clearCompleted: ->
-    @app.todos = @app.incompleteTodos
+    @app.all = @app.active
 
 class TodoController
   constructor: (@todo) ->
@@ -73,9 +68,9 @@ class TodoController
 app = App.find(1)
 
 router = Router
-  '/': -> app.page = 'all'
-  '/active': -> app.page = 'active'
-  '/completed': -> app.page = 'completed'
+  '/': -> app.filter = 'all'
+  '/active': -> app.filter = 'active'
+  '/completed': -> app.filter = 'completed'
 
 router.init()
 

@@ -13,7 +13,7 @@
     }
 
     Todo.belongsTo('app', {
-      inverseOf: 'todos',
+      inverseOf: 'all',
       as: function() {
         return App;
       }
@@ -36,15 +36,8 @@
 
     Todo.property('edit');
 
-    Todo.property('classes', {
-      dependsOn: ['completed', 'edit'],
-      get: function() {
-        return [this.edit ? 'editing' : void 0, this.completed ? 'completed' : void 0];
-      }
-    });
-
     Todo.prototype.remove = function() {
-      return this.app.todos["delete"](this);
+      return this.app.all["delete"](this);
     };
 
     return Todo;
@@ -61,7 +54,7 @@
 
     App.localStorage = true;
 
-    App.hasMany('todos', {
+    App.hasMany('all', {
       inverseOf: 'app',
       serialize: true,
       as: function() {
@@ -69,19 +62,19 @@
       }
     });
 
-    App.selection('incompleteTodos', {
-      from: 'todos',
+    App.selection('active', {
+      from: 'all',
       filter: 'incomplete'
     });
 
-    App.selection('completedTodos', {
-      from: 'todos',
+    App.selection('completed', {
+      from: 'all',
       filter: 'completed'
     });
 
-    App.property('left', {
+    App.property('label', {
       get: function() {
-        if (this.incompleteTodosCount === 1) {
+        if (this.activeCount === 1) {
           return 'item left';
         } else {
           return 'items left';
@@ -91,11 +84,11 @@
 
     App.property('allCompleted', {
       get: function() {
-        return this.incompleteTodosCount === 0;
+        return this.activeCount === 0;
       },
       set: function(value) {
         var todo, _i, _len, _ref, _results;
-        _ref = this.todos;
+        _ref = this.all;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           todo = _ref[_i];
@@ -107,18 +100,31 @@
 
     App.property('newTitle');
 
-    App.property('page');
+    App.property('filter', {
+      value: 'all'
+    });
 
-    App.property('currentTodos', {
+    App.property('filtered', {
       get: function() {
-        switch (this.page) {
-          case 'active':
-            return this.incompleteTodos;
-          case 'completed':
-            return this.completedTodos;
-          default:
-            return this.todos;
-        }
+        return this[this.filter];
+      }
+    });
+
+    App.property('filterAll', {
+      get: function() {
+        return this.filter === 'all';
+      }
+    });
+
+    App.property('filterActive', {
+      get: function() {
+        return this.filter === 'active';
+      }
+    });
+
+    App.property('filterCompleted', {
+      get: function() {
+        return this.filter === 'completed';
       }
     });
 
@@ -136,7 +142,7 @@
       var title;
       title = this.app.newTitle.trim();
       if (title) {
-        this.app.todos.push({
+        this.app.all.push({
           title: title
         });
       }
@@ -144,7 +150,7 @@
     };
 
     AppController.prototype.clearCompleted = function() {
-      return this.app.todos = this.app.incompleteTodos;
+      return this.app.all = this.app.active;
     };
 
     return AppController;
@@ -189,13 +195,13 @@
 
   router = Router({
     '/': function() {
-      return app.page = 'all';
+      return app.filter = 'all';
     },
     '/active': function() {
-      return app.page = 'active';
+      return app.filter = 'active';
     },
     '/completed': function() {
-      return app.page = 'completed';
+      return app.filter = 'completed';
     }
   });
 

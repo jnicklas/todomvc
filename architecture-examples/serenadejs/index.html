@@ -16,36 +16,36 @@
 
           input#new-todo[binding:change=@newTitle placeholder="What needs to be done?" autofocus="autofocus"]
 
-      - if @todosCount
+      - if @allCount
         section#main
           input#toggle-all[type="checkbox" binding:change=@allCompleted]
 
           label[for="toggle-all"] "Mark all as complete"
 
           ul#todo-list
-            - collection @currentTodos
+            - collection @filtered
               - view "todo"
 
         footer#footer
           span#todo-count
-            strong @incompleteTodosCount
+            strong @activeCount
             " "
-            @left
+            @label
 
-          ul#filters[class=@page]
+          ul#filters
             li
-              a.all[href="#/"] "All"
+              a.all[class:selected=@filterAll href="#/"] "All"
             li
-              a.active[href="#/active"] "Active"
+              a.active[class:selected=@filterActive href="#/active"] "Active"
             li
-              a.completed[href="#/completed"] "Completed"
-          - if @completedTodosCount
+              a.completed[class:selected=@filterCompleted href="#/completed"] "Completed"
+          - if @completedCount
             button#clear-completed[event:click=clearCompleted]
-              "Clear completed (" @completedTodosCount ")"
+              "Clear completed (" @completedCount ")"
   </script>
 
   <script id="todo" type="text/serenade">
-    li[class=@classes]
+    li[class:editing=@edit class:completed=@completed]
       form[event:submit=edited!]
         input.edit[on:load=loadField event:blur=edited! binding:change=@title]
 
@@ -54,13 +54,6 @@
         label[event:dblclick=edit] @title
         button.destroy[event:click=removeTodo]
   </script>
-
-  <style>
-    ul#filters.all .all, ul#filters.active .active, ul#filters.completed .completed {
-      font-weight: bold;
-    }
-  </style>
-
 </head>
 <body>
 	<footer id="info">
