@@ -28,7 +28,6 @@
     });
 
     Todo.property('incomplete', {
-      dependsOn: 'completed',
       get: function() {
         return !this.completed;
       }
@@ -52,7 +51,11 @@
       return App.__super__.constructor.apply(this, arguments);
     }
 
-    App.localStorage = true;
+    App.localStorage({
+      as: function() {
+        return "todomvc-serenade";
+      }
+    });
 
     App.hasMany('all', {
       inverseOf: 'app',

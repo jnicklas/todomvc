@@ -1,6 +1,6 @@
 /**
  * Serenade.js JavaScript Framework v0.3.0
- * Revision: 85e71a340b
+ * Revision: 7be1d88d00
  * http://github.com/elabs/serenade.js
  *
  * Copyright 2011, Jonas Nicklas, Elabs AB
@@ -580,19 +580,28 @@ Cache = {
     }
   },
   store: function(ctor, id, obj) {
-    var name;
-    name = ctor.uniqueId();
-    if (name && id && (typeof JSON !== "undefined" && JSON !== null)) {
-      return this._storage.setItem("" + name + "_" + id, JSON.stringify(serializeObject(obj)));
+    var key;
+    if (key = this.key(ctor, id)) {
+      return this._storage.setItem(key, JSON.stringify(serializeObject(obj)));
     }
   },
   retrieve: function(ctor, id) {
-    var data, name;
-    name = ctor.uniqueId();
-    if (name && id && ctor.localStorage && (typeof JSON !== "undefined" && JSON !== null)) {
-      data = this._storage.getItem("" + name + "_" + id);
+    var data, key;
+    if (key = this.key(ctor, id)) {
+      data = this._storage.getItem(key);
       if (data) {
         return new ctor(JSON.parse(data), true);
+      }
+    }
+  },
+  key: function(ctor, id) {
+    var name, _ref, _ref1, _ref2;
+    name = ctor.uniqueId();
+    if (name && id && ((_ref = ctor.localStorageOptions) != null ? _ref.on : void 0)) {
+      if ((_ref1 = ctor.localStorageOptions) != null ? _ref1.as : void 0) {
+        return (_ref2 = ctor.localStorageOptions) != null ? _ref2.as(id) : void 0;
+      } else {
+        return "" + name + "_" + id;
       }
     }
   }
@@ -1008,12 +1017,7 @@ SerenadeProperty = (function() {
     this.registerGlobal(object);
     if (this.options.get) {
       listener = function(name) {
-        if (_this.addDependency(name)) {
-          return def(object, "_s_dependencyCache", {
-            value: {},
-            configurable: true
-          });
-        }
+        return _this.addDependency(name);
       };
       if (!("dependsOn" in this.options)) {
         object._s_property_access.bind(listener);
@@ -1059,9 +1063,6 @@ SerenadeProperty = (function() {
 
   SerenadeProperty.prototype.dependents = function(object) {
     var deps, findDependencies;
-    if (object._s_dependencyCache.hasOwnProperty(this.name)) {
-      return object._s_dependencyCache[this.name];
-    }
     deps = [];
     findDependencies = function(name) {
       var property, _i, _len, _ref, _ref1, _results;
@@ -1079,7 +1080,7 @@ SerenadeProperty = (function() {
       return _results;
     };
     findDependencies(this.name);
-    return object._s_dependencyCache[this.name] = deps;
+    return deps;
   };
 
   SerenadeProperty.prototype.triggerChanges = function(object) {
@@ -1155,10 +1156,6 @@ defineProperty = function(object, name, options) {
     optimize: function(queue) {
       return queue[queue.length - 1];
     }
-  });
-  def(object, "_s_dependencyCache", {
-    value: {},
-    configurable: true
   });
   def(object, name, {
     get: function() {
@@ -1270,17 +1267,25 @@ Model = (function() {
     return names.forEach(function(name) {
       var propName;
       propName = name;
-      if (options.prefix) {
+      if (options.prefix === true) {
         propName = to + capitalize(name);
+      } else if (options.prefix) {
+        propName = options.prefix + capitalize(name);
       }
-      if (options.suffix) {
+      if (options.suffix === true) {
         propName = propName + capitalize(to);
+      } else if (options.suffix) {
+        propName = propName + options.suffix;
       }
       return _this.property(propName, {
         dependsOn: "" + to + "." + name,
         get: function() {
           var _ref;
           return (_ref = this[to]) != null ? _ref[name] : void 0;
+        },
+        set: function(value) {
+          var _ref;
+          return (_ref = this[to]) != null ? _ref[name] = value : void 0;
         }
       });
     });
@@ -1425,6 +1430,16 @@ Model = (function() {
     });
   };
 
+  Model.localStorage = function(options) {
+    if (options == null) {
+      options = {};
+    }
+    this.localStorageOptions = options;
+    if (!("on" in options)) {
+      return this.localStorageOptions.on = true;
+    }
+  };
+
   Model.uniqueId = function() {
     if (!(this._uniqueId && this._uniqueGen === this)) {
       this._uniqueId = (idCounter += 1);
@@ -1449,7 +1464,7 @@ Model = (function() {
   });
 
   function Model(attributes, bypassCache) {
-    var fromCache,
+    var fromCache, _ref,
       _this = this;
     if (bypassCache == null) {
       bypassCache = false;
@@ -1465,11 +1480,11 @@ Model = (function() {
         }
       }
     }
-    if (this.constructor.localStorage) {
+    if ((_ref = this.constructor.localStorageOptions) != null ? _ref.on : void 0) {
       this.saved.bind(function() {
         return Cache.store(_this.constructor, _this.id, _this);
       });
-      if (this.constructor.localStorage !== 'save') {
+      if (this.constructor.localStorageOptions.on !== 'save') {
         this.change.bind(function() {
           return Cache.store(_this.constructor, _this.id, _this);
         });

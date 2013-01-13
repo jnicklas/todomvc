@@ -4,7 +4,6 @@ class Todo extends Serenade.Model
 
   @property 'completed', serialize: true
   @property 'incomplete',
-    dependsOn: 'completed',
     get: -> not @completed
 
   @property 'edit'
@@ -13,7 +12,7 @@ class Todo extends Serenade.Model
     @app.all.delete(this)
 
 class App extends Serenade.Model
-  @localStorage = true
+  @localStorage as: -> "todomvc-serenade"
 
   @hasMany 'all', inverseOf: 'app', serialize: true, as: -> Todo
 
@@ -31,8 +30,9 @@ class App extends Serenade.Model
 
   @property 'filter', value: 'all'
   @property 'filtered', get: -> @[@filter]
-  @property 'filterAll', get: -> @filter is 'all'
-  @property 'filterActive', get: -> @filter is 'active'
+
+  @property 'filterAll',       get: -> @filter is 'all'
+  @property 'filterActive',    get: -> @filter is 'active'
   @property 'filterCompleted', get: -> @filter is 'completed'
 
 class AppController
