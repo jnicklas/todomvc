@@ -51,12 +51,6 @@
       return App.__super__.constructor.apply(this, arguments);
     }
 
-    App.localStorage({
-      as: function() {
-        return "todomvc-serenade";
-      }
-    });
-
     App.hasMany('all', {
       inverseOf: 'app',
       serialize: true,
@@ -183,7 +177,7 @@
       } else {
         this.todo.remove();
       }
-      return this.todo.app.save();
+      return this.todo.app.changed.trigger();
     };
 
     TodoController.prototype.loadField = function(field) {
@@ -194,7 +188,11 @@
 
   })();
 
-  app = App.find(1);
+  app = new App(JSON.parse(localStorage.getItem("todomvc-serenade")));
+
+  app.changed.bind(function() {
+    return localStorage.setItem("todomvc-serenade", app);
+  });
 
   router = Router({
     '/': function() {

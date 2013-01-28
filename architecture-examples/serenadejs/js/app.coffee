@@ -12,8 +12,6 @@ class Todo extends Serenade.Model
     @app.all.delete(this)
 
 class App extends Serenade.Model
-  @localStorage as: -> "todomvc-serenade"
-
   @hasMany 'all', inverseOf: 'app', serialize: true, as: -> Todo
 
   @selection 'active', from: 'all', filter: 'incomplete'
@@ -61,11 +59,12 @@ class TodoController
       @todo.edit = false if @todo.edit
     else
       @todo.remove()
-    @todo.app.save()
+    @todo.app.changed.trigger()
 
   loadField: (@field) ->
 
-app = App.find(1)
+app = new App(JSON.parse(localStorage.getItem("todomvc-serenade")))
+app.changed.bind -> localStorage.setItem("todomvc-serenade", app)
 
 router = Router
   '/': -> app.filter = 'all'
@@ -74,7 +73,6 @@ router = Router
 
 router.init()
 
-# boring setup
 Serenade.view('app', document.getElementById('app').innerHTML)
 Serenade.view('todo', document.getElementById('todo').innerHTML)
 Serenade.controller('app', AppController)
